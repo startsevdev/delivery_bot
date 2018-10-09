@@ -178,10 +178,15 @@ def del_item_from_order(message):
     cursor = conn.cursor()
 
     cursor.execute("SELECT id FROM users_items WHERE user_id = {}".format(message.from_user.id))
-    id = cursor.fetchall()[int(message.text)][0]
-    cursor.execute("DELETE FROM users_items WHERE id = {}".format(id))
 
-    conn.commit()
+    try:
+        id = cursor.fetchall()[int(message.text) - 1][0]
+    except IndexError as err:
+        print(err)
+        #bot.send_message(message.from_user.id, return_order_list(message) + "Укажите номер пунктa")
+    else:
+        cursor.execute("DELETE FROM users_items WHERE id = {}".format(id))
+        conn.commit()
     conn.close()
 
 
