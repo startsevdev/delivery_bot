@@ -29,6 +29,15 @@ def console_print(message):
     print("{} | {}: {}".format(now, message.from_user.first_name, message.text))
 
 
+def return_name(message):
+    if message.from_user.last_name:
+        name = message.from_user.last_name + message.from_user.first_name
+    else:
+        name = message.from_user.first_name
+
+    return name
+
+
 
 #KEYBOARDS
 
@@ -107,7 +116,6 @@ def return_order_list(message):
 
     if order_list == "Мой заказ: \n":
         order_list = "Заказ пуст 🤷‍♀️"
-
 
     return order_list
 
@@ -198,6 +206,25 @@ def send_menu(message):
         bot.send_message(message.from_user.id, "Выберите пиццу: ", reply_markup=pre_order_menu_keyboard())
 
 
+def send_order(message):
+    conn = sqlite3.connect('/Users/alexander/code/bots/databases/iskra.db')
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT address FROM users WHERE user_id = {}".format(message.from_user.id))
+    address = cursor.fetchone()[0]
+
+    cursor.execute("SELECT phone FROM users WHERE user_id = {}".format(message.from_user.id))
+    phone = cursor.fetchone()[0]
+
+    name = return_name(message)
+
+    order_text = return_order_list(message) + "\n"
+    order_text += "Адрес: " + address
+
+    bot.send_message('26978532', order_text)
+    bot.send_contact(message.from_user.id, phone, name)
+
+
 @bot.message_handler(commands=['start'])
 def start(message):
     console_print(message)
@@ -205,6 +232,45 @@ def start(message):
     add_user(message)
 
     bot.send_message(message.from_user.id, "Добро пожаловать!", reply_markup=menu_keyboard())
+
+
+@bot.message_handler(content_types="location")
+def get_location(message):
+    print("I GOT LOCATION")
+
+    bot.send_location(message.from_user.id, message.location.latitude, message.location.longitude)
+
+
+@bot.message_handler(content_types="contact")
+def get_contact(message):
+    if return_state(message) == "WAIT_NUMBER":
+        print("I GOT CONTACT")
+
+        conn = sqlite3.connect('/Users/alexander/code/bots/databases/iskra.db')
+        cursor = conn.cursor()
+
+        cursor.execute("UPDATE users SET phone = '{}' WHERE user_id = {}".format(message.contact.phone_number, message.from_user.id))
+        conn.commit()
+
+        send_order(message)
+
+        cursor.execute("UPDATE users SET "
+                       "phone = NULL, "
+                       "address = NULL, "
+                       "watching_item = NULL, "
+                       "state = 'WAIT_FIRST_ITEM' "
+                       "WHERE user_id = {}".format(message.from_user.id))
+        conn.commit()
+
+        cursor.execute("DELETE FROM users_items WHERE user_id = {}".format(message.from_user.id))
+        conn.commit()
+
+        conn.close()
+
+        bot.send_message(message.from_user.id, "Ваш заказ успешно оформлен! Мы свяжемся с вами в течение 5 минут")
+
+        send_menu(message)
+
 
 
 @bot.message_handler()
@@ -242,6 +308,23 @@ def giving_text(message):
             bot.send_message(message.from_user.id, "Укажите номер пунктa")
 
             set_state(message, "WAIT_DEL")
+
+    elif message.text == "Подтвердить заказ":
+        set_state(message, "WAIT_ADDRESS")
+        bot.send_message(message.from_user.id, "Укажите адрес")
+
+    elif return_state(message) == "WAIT_ADDRESS":
+        conn = sqlite3.connect('/Users/alexander/code/bots/databases/iskra.db')
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET address = '{}', state = 'WAIT_NUMBER' WHERE user_id = {}".format(message.text, message.from_user.id))
+        conn.commit()
+        conn.close()
+
+        keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+        button_phone = types.KeyboardButton(text="Отправить номер телефона", request_contact=True)
+        keyboard.add(button_phone)
+
+        bot.send_message(message.from_user.id, "Как с вами можно связаться?", reply_markup=keyboard)
 
     elif return_state(message) == "WAIT_DEL":
         if message.text.isdigit() and int(message.text) > 0:
