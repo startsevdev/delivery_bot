@@ -89,7 +89,7 @@ def return_order_list(message):
     order_list = "Мой заказ: \n"
     order_item_names = []
 
-    conn = sqlite3.connect('/Users/alexander/code/databases/iskra.db')
+    conn = sqlite3.connect('/Users/alexander/code/bots/databases/iskra.db')
     cursor = conn.cursor()
 
     cursor.execute("SELECT item_id FROM users_items WHERE user_id = {}".format(message.from_user.id))
@@ -108,11 +108,12 @@ def return_order_list(message):
     if order_list == "Мой заказ: \n":
         order_list = "Заказ пуст 🤷‍♀️"
 
+
     return order_list
 
 
 def set_state(message, state):
-    conn = sqlite3.connect('/Users/alexander/code/databases/iskra.db')
+    conn = sqlite3.connect('/Users/alexander/code/bots/databases/iskra.db')
     cursor = conn.cursor()
     cursor.execute("UPDATE users SET state = '{}' WHERE user_id = {}".format(state, message.from_user.id))
     conn.commit()
@@ -120,7 +121,7 @@ def set_state(message, state):
 
 
 def return_state(message):
-    conn = sqlite3.connect('/Users/alexander/code/databases/iskra.db')
+    conn = sqlite3.connect('/Users/alexander/code/bots/databases/iskra.db')
     cursor = conn.cursor()
     cursor.execute("SELECT state FROM users WHERE user_id = {}".format(message.chat.id))
     state = cursor.fetchone()
@@ -137,7 +138,7 @@ def return_state(message):
 
 
 def add_user(message):
-    conn = sqlite3.connect('/Users/alexander/code/databases/iskra.db')
+    conn = sqlite3.connect('/Users/alexander/code/bots/databases/iskra.db')
     cursor = conn.cursor()
 
     try:
@@ -155,7 +156,7 @@ def add_user(message):
 
 
 def add_item_in_order(message):
-    conn = sqlite3.connect('/Users/alexander/code/databases/iskra.db')
+    conn = sqlite3.connect('/Users/alexander/code/bots/databases/iskra.db')
     cursor = conn.cursor()
 
     cursor.execute("SELECT watching_item from users WHERE user_id = {}".format(message.from_user.id))
@@ -174,7 +175,7 @@ def add_item_in_order(message):
 
 
 def del_item_from_order(message):
-    conn = sqlite3.connect('/Users/alexander/code/databases/iskra.db')
+    conn = sqlite3.connect('/Users/alexander/code/bots/databases/iskra.db')
     cursor = conn.cursor()
 
     cursor.execute("SELECT id FROM users_items WHERE user_id = {}".format(message.from_user.id))
@@ -220,7 +221,7 @@ def giving_text(message):
 
     elif message.text == "Оформить заказ":
 
-        conn = sqlite3.connect('/Users/alexander/code/databases/iskra.db')
+        conn = sqlite3.connect('/Users/alexander/code/bots/databases/iskra.db')
         cursor = conn.cursor()
         cursor.execute("UPDATE users SET state = 'WAIT_CONFIRM' WHERE user_id = {}".format(message.from_user.id))
         conn.commit()
@@ -232,19 +233,26 @@ def giving_text(message):
         send_menu(message)
 
     elif message.text == "Удалить пиццу":
-        if return_order_list(message) == "Список пуст 🤷‍♀️":
-            send_menu(message, return_order_list(message))
+        if return_order_list(message) == "Заказ пуст 🤷‍♀️":
+            set_state(message, "WAIT_FIRST_ITEM")
+            bot.send_message(message.from_user.id, return_order_list(message))
+            send_menu(message)
         else:
-            bot.send_message(message.chat.id, return_order_list(message))
-            bot.send_message(message.chat.id, "Укажите номер пунктa")
+            bot.send_message(message.from_user.id, return_order_list(message))
+            bot.send_message(message.from_user.id, "Укажите номер пунктa")
 
             set_state(message, "WAIT_DEL")
 
     elif return_state(message) == "WAIT_DEL":
         if message.text.isdigit() and int(message.text) > 0:
             del_item_from_order(message)
-            set_state(message, "WAIT_CONFIRM")
-            bot.send_message(message.from_user.id, return_order_list(message), reply_markup=confirm_order_keyboard())
+            if return_order_list(message) == "Заказ пуст 🤷‍♀️":
+                set_state(message, "WAIT_FIRST_ITEM")
+                bot.send_message(message.from_user.id, return_order_list(message))
+                send_menu(message)
+            else:
+                set_state(message, "WAIT_CONFIRM")
+                bot.send_message(message.from_user.id, return_order_list(message), reply_markup=confirm_order_keyboard())
         else:
             bot.send_message(message.from_user.id, "❗ Введите натуральное число.")
 
@@ -252,7 +260,7 @@ def giving_text(message):
     else:
         for item in items:
             if message.text == item:
-                conn = sqlite3.connect('/Users/alexander/code/databases/iskra.db')
+                conn = sqlite3.connect('/Users/alexander/code/bots/databases/iskra.db')
                 cursor = conn.cursor()
 
                 cursor.execute("UPDATE users SET watching_item = '{}' WHERE user_id = '{}'".format(message.text,
