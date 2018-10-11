@@ -49,97 +49,102 @@
     <session id="123849495">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
+          <entry key="project.closed" value="4" />
           <entry key="project.open.time.0" value="1" />
-          <entry key="project.opened" value="1" />
+          <entry key="project.open.time.5" value="2" />
+          <entry key="project.open.time.7" value="1" />
+          <entry key="project.open.time.8" value="1" />
+          <entry key="project.opened" value="5" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="1559" />
+          <entry key="py" value="5558" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="1559" />
+          <entry key="Python" value="5558" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="2" />
+          <entry key="py" value="5" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.vcs.git.usages" />
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="2" />
+          <entry key="Python" value="5" />
         </counts>
       </usages-collector>
     </session>
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="delivery_bot" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2405">
-              <caret line="222" lean-forward="true" selection-start-line="222" selection-end-line="222" />
+            <state relative-caret-position="174">
+              <caret line="229" column="10" selection-start-line="229" selection-start-column="5" selection-end-line="229" selection-end-column="10" />
               <folding>
-                <element signature="e#0#11#0" expanded="true" />
-                <marker date="1539182583645" expanded="true" signature="6302:6406" ph="..." />
-                <marker date="1539182583645" expanded="true" signature="6687:7878" ph="..." />
+                <element signature="e#5#19#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/Documents/GitHub/MyBudgetBot/bot.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="224">
-              <caret line="44" column="15" selection-start-line="38" selection-end-line="44" selection-end-column="15" />
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>upda</find>
-      <find>зака</find>
-      <find>1</find>
-      <find>return_st</find>
-      <find>list</find>
-      <find>/start</find>
-      <find>bot</find>
-      <find>bot.poll</find>
-      <find>добро</find>
+      <find>Users/alexander/code/bots/databases/iskra.db</find>
+      <find>'/Users/alexander/code/bots/databases/iskra.db'</find>
+      <find>send</find>
+      <find>добави</find>
+      <find>wait_order</find>
+      <find>добавл</find>
+      <find>retu</find>
+      <find>return_ord</find>
+      <find>send_meny</find>
+      <find>оформит</find>
+      <find>send_it</find>
+      <find>удали</find>
       <find>оформ</find>
-      <find>api</find>
-      <find>exce</find>
-      <find>state</find>
-      <find>update</find>
-      <find>добавить</find>
-      <find>Добавить</find>
-      <find>добавить в</find>
-      <find>set_sta</find>
-      <find>Удалить</find>
+      <find>подтве</find>
+      <find>send_me</find>
       <find>pre_order</find>
-      <find>pre_order_key</find>
-      <find>del</find>
-      <find>try</find>
-      <find>пуст</find>
-      <find>send_men</find>
-      <find>заказ п</find>
-      <find>adress</find>
-      <find>address</find>
-      <find>send_orde</find>
-      <find>name</find>
+      <find>уда</find>
+      <find>addres</find>
+      <find>locat</find>
+      <find>удал</find>
+      <find>phone</find>
+      <find>add_u</find>
+      <find>связа</find>
+      <find>return_nam</find>
+      <find>send_ord</find>
+      <find>геоп</find>
+      <find>del_</find>
+      <find>del_item</find>
+      <find>заказ пу</find>
+      <find>print</find>
     </findStrings>
     <replaceStrings>
       <replace>Добавить в заказ</replace>
       <replace>Удалить пиццй</replace>
       <replace>Удалить пиццу</replace>
+      <replace>WAIT_PHONE</replace>
+      <replace>database</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -148,6 +153,7 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
+        <option value="$PROJECT_DIR$/bot.py" />
         <option value="$PROJECT_DIR$/main.py" />
       </list>
     </option>
@@ -196,7 +202,28 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.main">
+    <configuration name="bot" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="delivery_bot" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/bot.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="delivery_bot" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -218,9 +245,14 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Python.main" />
+      <item itemvalue="Python.bot" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.bot" />
       </list>
     </recent_temporary>
   </component>
@@ -237,20 +269,29 @@
     </task>
     <servers />
   </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10047847" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4982699" weight="0.0" />
+      <window_info id="Structure" order="1" sideWeight="0.5017301" side_tool="true" weight="0.0" />
+      <window_info id="Favorites" order="2" side_tool="true" weight="0.3293461" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.36427566" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.20253165" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3994374" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32911393" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.32911393" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
@@ -260,16 +301,16 @@
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
     </layout>
     <layout-to-restore>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.07017544" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4982699" visible="true" weight="0.0" />
+      <window_info id="Structure" order="1" sideWeight="0.5017301" side_tool="true" visible="true" weight="0.0" />
+      <window_info id="Favorites" order="2" side_tool="true" weight="0.3293461" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.34317863" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.18706048" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3994374" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32911393" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.32911393" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
@@ -315,19 +356,37 @@
     </entry>
     <entry file="file://$USER_HOME$/Documents/GitHub/MyBudgetBot/bot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="224">
+        <state relative-caret-position="-6408">
           <caret line="44" column="15" selection-start-line="38" selection-end-line="44" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../MyBudgetBot/bot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="160">
+          <caret line="33" column="14" selection-start-line="33" selection-start-column="4" selection-end-line="33" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="6" column="3" selection-end-line="497" />
+          <folding>
+            <marker date="1539292168687" expanded="true" signature="2532:2762" ph="..." />
+            <marker date="1539292168687" expanded="true" signature="4410:4620" ph="..." />
+            <marker date="1539292168687" expanded="true" signature="7357:9421" ph="..." />
+            <marker date="1539292168687" expanded="true" signature="9783:10391" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2405">
-          <caret line="222" lean-forward="true" selection-start-line="222" selection-end-line="222" />
+        <state relative-caret-position="174">
+          <caret line="229" column="10" selection-start-line="229" selection-start-column="5" selection-end-line="229" selection-end-column="10" />
           <folding>
-            <element signature="e#0#11#0" expanded="true" />
-            <marker date="1539182583645" expanded="true" signature="6302:6406" ph="..." />
-            <marker date="1539182583645" expanded="true" signature="6687:7878" ph="..." />
+            <element signature="e#5#19#0" expanded="true" />
           </folding>
         </state>
       </provider>

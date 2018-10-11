@@ -227,7 +227,7 @@ def return_order_list(message):
 
     cursor.execute("SELECT item_id FROM users_items WHERE user_id = {}".format(message.from_user.id))
     order_item_ids = cursor.fetchall()
-    #print(order_item_ids)
+    print(order_item_ids)
 
     for i in order_item_ids:
         cursor.execute("SELECT name FROM items WHERE id = {}".format(i[0]))
@@ -406,7 +406,7 @@ def giving_text(message):
         elif message.text == "Удалить пиццу":
             if return_order_list(message) == "Заказ пуст 🤷‍♀️":
                 set_state(message, WAIT_FIRST_WATCHING_ITEM)
-                bot.send_message(message.from_user.id, return_order_list(message) + "\nДобавьте пиццу:", reply_markup=menu_keyboard())
+                bot.send_message(message.from_user.id, return_order_list(message) + "\nВыберите пиццу:", reply_markup=menu_keyboard())
             else:
                 set_state(message, WAIT_DEL)
                 bot.send_message(message.from_user.id, return_order_list(message) + "\nУкажите номер пункта", reply_markup=numbers_keyboard())
@@ -479,7 +479,7 @@ def giving_text(message):
 
             if return_order_list(message) == "Заказ пуст 🤷‍♀️":
                 set_state(message, WAIT_FIRST_WATCHING_ITEM)
-                bot.send_message(message.from_user.id, return_order_list(message) + "\nДобавьте пиццу:", reply_markup=menu_keyboard())
+                bot.send_message(message.from_user.id, return_order_list(message), reply_markup=menu_keyboard())
 
             else:
                 set_state(message, WAIT_CONFIRM)
