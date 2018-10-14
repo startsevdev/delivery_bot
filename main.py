@@ -225,8 +225,28 @@ def add_item_in_order(message):
     conn.close()
 
 
+def return_order_sum(message):
+    order_prices = []
+
+    conn = sqlite3.connect(database)
+    cursor = conn.cursor()
+
+    # достаем id добавленных товаров из users_items
+    cursor.execute("SELECT item_id FROM users_items WHERE user_id = {}".format(message.from_user.id))
+    order_item_ids = cursor.fetchall()
+
+    # добавляем цену товаров в список кортежей order_prices
+    for item_id in order_item_ids:
+        cursor.execute("SELECT price FROM items WHERE id = {}".format(item_id[0]))
+
+        order_prices.append(cursor.fetchone()[0])
+    order_sum = sum(order_prices)
+
+    return order_sum
+
+
 def return_order_list(message):
-    order_text = "Мой заказ: \n"
+    order_text = "Мой заказ:\n"
     order_items = []
     order_items_prices = []
     order_items_strings = []
@@ -256,13 +276,13 @@ def return_order_list(message):
         order_text += "{}. {}\n".format(counter, order_items_string)
 
     # считаем сумму заказа
-    for order_item in order_items:
-        order_items_prices.append(order_item[1])
-    order_sum = sum(order_items_prices)
+    #for order_item in order_items:
+     #   order_items_prices.append(order_item[1])
+    #order_sum = sum(order_items_prices)
 
-    order_text += "\nСумма: {} р.".format(order_sum)
+    order_text += "\nСумма: {} р.".format(return_order_sum(message))
 
-    if order_text == "Мой заказ: \n":
+    if order_text == "Мой заказ:\n\nСумма: 0 р.":
         order_text = "Заказ пуст 🤷‍♀️"
 
     return order_text
@@ -374,7 +394,7 @@ def send_order(message):
 
 @bot.message_handler(commands=['test'])
 def test(message):
-    del_item_from_order(message)
+    print(return_order_sum(message))
 
 
 @bot.message_handler(commands=['start'])
@@ -441,8 +461,11 @@ def giving_text(message):
     elif return_state(message) == WAIT_WATCHING_ITEM:
 
         if message.text == "Оформить заказ":
-            set_state(message, WAIT_CONFIRM)
-            bot.send_message(message.from_user.id, return_order_list(message), reply_markup=confirm_order_keyboard())
+            if return_order_sum(message) >= 500:
+                set_state(message, WAIT_CONFIRM)
+                bot.send_message(message.from_user.id, return_order_list(message), reply_markup=confirm_order_keyboard())
+            else:
+                bot.send_message(message.from_user.id, return_order_list(message) + "\n\nМинимальная сумма заказа 500 руб. Добавьте еще одну пиццу 🍕", reply_markup=menu_keyboard())
 
         elif message.text == "Удалить пиццу":
             if return_order_list(message) == "Заказ пуст 🤷‍♀️":
@@ -476,9 +499,12 @@ def giving_text(message):
             bot.send_message(message.from_user.id, "Выберите пиццу:\n", reply_markup=pre_order_menu_keyboard())
 
         elif message.text == "Оформить заказ":
-            clear_watching_item(message)
-            set_state(message, WAIT_CONFIRM)
-            bot.send_message(message.from_user.id, return_order_list(message), reply_markup=confirm_order_keyboard())
+            if return_order_sum(message) >= 500:
+                clear_watching_item(message)
+                set_state(message, WAIT_CONFIRM)
+                bot.send_message(message.from_user.id, return_order_list(message), reply_markup=confirm_order_keyboard())
+            else:
+                bot.send_message(message.from_user.id, "Минимальная сумма заказа 500 руб. Добавьте еще одну пиццу 🍕", reply_markup=item_keyboard_1())
 
         else:
             bot.send_message(message.from_user.id, "Добавьте пиццу в заказ, вернитесь к меню или перейдите к оформлению заказа:", item_keyboard_2())
@@ -486,8 +512,12 @@ def giving_text(message):
     elif return_state(message) == WAIT_CONFIRM:
 
         if message.text == "Подтвердить заказ":
-            set_state(message, WAIT_ADDRESS)
-            bot.send_message(message.from_user.id, "Поделитесь своей геопозицией через кнопку ниже или просто впишите улицу, номер дома и подъезд", reply_markup=geo_keyboard())
+            if return_order_sum(message) >= 500:
+                set_state(message, WAIT_ADDRESS)
+                bot.send_message(message.from_user.id, "Поделитесь своей геопозицией через кнопку ниже или просто впишите улицу, номер дома и подъезд", reply_markup=geo_keyboard())
+            else:
+                set_state(message, WAIT_WATCHING_ITEM)
+                bot.send_message(message.from_user.id, return_order_list(message) + "\n\nМинимальная сумма заказа 500 руб. Добавьте еще одну пиццу 🍕", reply_markup=menu_keyboard())
 
         elif message.text == "Добавить пиццу":
             set_state(message, WAIT_WATCHING_ITEM)
