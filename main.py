@@ -16,8 +16,6 @@ logger = telebot.logger
 
 database = "/Users/alexander/code/bots/databases/iskra.db"
 
-items = ["Маргарита", "Прошуто фунге", "Пепперони"]
-
 WAIT_DEL = 0
 WAIT_FIRST_WATCHING_ITEM = 1
 WAIT_FIRST_ITEM = 2
@@ -40,7 +38,25 @@ def console_print(message):
     print("{} | {}: {}".format(now, message.from_user.first_name, message.text))
 
 
+def return_items():
+    items_list = []
+
+    conn = sqlite3.connect(database)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT name FROM items")
+
+    for item in cursor.fetchall():
+        items_list.append(item[0])
+
+    conn.close()
+
+    return items_list
+
+
 # KEYBOARDS
+
+items = return_items()
 
 
 def menu_keyboard():
@@ -55,12 +71,10 @@ def menu_keyboard():
 def pre_order_menu_keyboard():
     keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 
-    keyboard.add("Оформить заказ")
+    keyboard.add("Удалить пиццу", "Оформить заказ")
 
     for item in items:
         keyboard.add(item)
-
-    keyboard.add("Удалить пиццу")
 
     return keyboard
 
@@ -76,8 +90,7 @@ def item_keyboard_1():
 def item_keyboard_2():
     keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
     keyboard.add("Добавить в заказ")
-    keyboard.add("Меню")
-    keyboard.add("Оформить заказ")
+    keyboard.add("Меню", "Оформить заказ")
 
     return keyboard
 
@@ -85,23 +98,17 @@ def item_keyboard_2():
 def confirm_order_keyboard():
     keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
     keyboard.add("Подтвердить заказ")
-    keyboard.add("Добавить пиццу")
-    keyboard.add("Удалить пиццу")
+    keyboard.add("Удалить пиццу", "Добавить пиццу")
 
     return keyboard
 
 
 def numbers_keyboard():
     keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-    keyboard.add("1")
-    keyboard.add("2")
-    keyboard.add("3")
-    keyboard.add("4")
-    keyboard.add("5")
-    keyboard.add("6")
-    keyboard.add("7")
-    keyboard.add("8")
-    keyboard.add("9")
+    keyboard.add("1", "2", "3")
+    keyboard.add("4", "5", "6")
+    keyboard.add("7", "8", "9")
+    keyboard.add("Отмена")
 
     return keyboard
 
@@ -219,29 +226,91 @@ def add_item_in_order(message):
 
 
 def return_order_list(message):
-    order_list = "Мой заказ: \n"
-    order_item_names = []
+    order_text = "Мой заказ: \n"
+    order_items = []
+    order_items_prices = []
+    order_items_strings = []
 
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
 
+    # достаем id добавленных товаров из users_items
     cursor.execute("SELECT item_id FROM users_items WHERE user_id = {}".format(message.from_user.id))
     order_item_ids = cursor.fetchall()
-    #print(order_item_ids)
 
-    for i in order_item_ids:
-        cursor.execute("SELECT name FROM items WHERE id = {}".format(i[0]))
-        order_item_names.append(cursor.fetchone()[0])
-
+    # добавляем название и цену добавленных товаров в список кортежей order_items
+    for item_id in order_item_ids:
+        cursor.execute("SELECT name, price FROM items WHERE id = {}".format(item_id[0]))
+        order_items.append(cursor.fetchone())
     conn.close()
 
-    for counter, item_name in enumerate(order_item_names[0:], 1):
-        order_list += "{}. {}\n".format(counter, item_name)
+    # сортируем по имени товара
+    order_items = sorted(order_items)
 
-    if order_list == "Мой заказ: \n":
-        order_list = "Заказ пуст 🤷‍♀️"
+    # создаем строку с каждым из товаров
+    for order_item in order_items:
+        order_items_strings.append("{} – {} р.".format(order_item[0], order_item[1]))
 
-    return order_list
+    # создаем пронумерованный список строк
+    for counter, order_items_string in enumerate(order_items_strings, 1):
+        order_text += "{}. {}\n".format(counter, order_items_string)
+
+    # считаем сумму заказа
+    for order_item in order_items:
+        order_items_prices.append(order_item[1])
+    order_sum = sum(order_items_prices)
+
+    order_text += "\nСумма: {} р.".format(order_sum)
+
+    if order_text == "Мой заказ: \n":
+        order_text = "Заказ пуст 🤷‍♀️"
+
+    return order_text
+
+
+def del_item_from_order(message):
+    item_ids = []
+    ids = []
+    names_ids = []
+
+    conn = sqlite3.connect(database)
+    cursor = conn.cursor()
+
+    # достаем item_id из users_items в список кортежей
+    cursor.execute("SELECT item_id FROM users_items WHERE user_id = {}".format(message.from_user.id))
+    item_ids_tuple = cursor.fetchall()
+
+    for i in item_ids_tuple:
+        item_ids.append(i[0])
+
+    # достаем id из users_items в список кортежей
+    cursor.execute("SELECT id FROM users_items WHERE user_id = {}".format(message.from_user.id))
+    ids_tuple = cursor.fetchall()
+
+    for i in ids_tuple:
+        ids.append(i[0])
+
+    # объединяем item_id и id
+    item_id_id = [list(tup) for tup in zip(item_ids, ids)]
+
+    # добавляем в names_ids списки [name, id]
+    for i in item_id_id:
+        cursor.execute("SELECT name FROM items WHERE id = {}".format(i[0]))
+        names_ids.append([cursor.fetchone()[0], i[1]])
+
+    # сортируем
+    names_ids = sorted(names_ids)
+
+    print(names_ids)
+
+    try:
+        del_id = names_ids[int(message.text) - 1][1]
+    except IndexError as err:
+        print(err)
+    else:
+        cursor.execute("DELETE FROM users_items WHERE id = {}".format(del_id))
+        conn.commit()
+    conn.close()
 
 
 def set_location(message):
@@ -274,23 +343,6 @@ def set_phone(message):
     conn.close()
 
 
-def send_order_address(message):
-    conn = sqlite3.connect(database)
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT address FROM users WHERE user_id = {}".format(message.from_user.id))
-    address = cursor.fetchone()[0]
-
-    cursor.execute("SELECT phone FROM users WHERE user_id = {}".format(message.from_user.id))
-    phone = cursor.fetchone()[0]
-
-    order_text = return_order_list(message) + "\n"
-    order_text += "Адрес: " + address
-
-    bot.send_message("26978532", order_text)
-    bot.send_contact('26978532', phone, message.from_user.first_name)
-
-
 def send_order(message):
     order_text = return_order_list(message) + "\n"
 
@@ -317,23 +369,12 @@ def send_order(message):
     bot.send_contact('26978532', phone, message.from_user.first_name)
 
 
-def del_item_from_order(message):
-    conn = sqlite3.connect(database)
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT id FROM users_items WHERE user_id = {}".format(message.from_user.id))
-
-    try:
-        item_id = cursor.fetchall()[int(message.text) - 1][0]
-    except IndexError as err:
-        print(err)
-    else:
-        cursor.execute("DELETE FROM users_items WHERE id = {}".format(item_id))
-        conn.commit()
-    conn.close()
-
-
 # HANDLERS
+
+
+@bot.message_handler(commands=['test'])
+def test(message):
+    del_item_from_order(message)
 
 
 @bot.message_handler(commands=['start'])
