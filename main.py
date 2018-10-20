@@ -507,7 +507,7 @@ def giving_text(message):
                 set_state(message, WAIT_CONFIRM)
                 bot.send_message(message.from_user.id, return_order_list(message), reply_markup=confirm_order_keyboard())
             else:
-                bot.send_message(message.from_user.id, "Минимальная сумма заказа 500 руб. Добавьте еще одну пиццу 🍕", reply_markup=menu_keyboard_1())
+                bot.send_message(message.from_user.id, "Минимальная сумма заказа 500 руб. Добавьте еще одну пиццу 🍕", reply_markup=pre_order_menu_keyboard())
 
         else:
             bot.send_message(message.from_user.id, "Добавьте пиццу в заказ, вернитесь к меню или перейдите к оформлению заказа:", item_keyboard_2())
