@@ -394,6 +394,7 @@ def send_order(message):
 
 @bot.message_handler(commands=['test'])
 def test(message):
+    console_print(message)
     print(return_order_sum(message))
 
 
@@ -408,6 +409,7 @@ def start(message):
 
 @bot.message_handler(content_types="location")
 def get_location(message):
+    console_print(message)
 
     if return_state(message) == WAIT_ADDRESS:
 
@@ -418,6 +420,7 @@ def get_location(message):
 
 @bot.message_handler(content_types="contact")
 def get_contact(message):
+    console_print(message)
 
     if return_state(message) == WAIT_PHONE_ADDRESS or return_state(message) == WAIT_PHONE_LOCATION:
 
@@ -504,7 +507,7 @@ def giving_text(message):
                 set_state(message, WAIT_CONFIRM)
                 bot.send_message(message.from_user.id, return_order_list(message), reply_markup=confirm_order_keyboard())
             else:
-                bot.send_message(message.from_user.id, "Минимальная сумма заказа 500 руб. Добавьте еще одну пиццу 🍕", reply_markup=item_keyboard_1())
+                bot.send_message(message.from_user.id, "Минимальная сумма заказа 500 руб. Добавьте еще одну пиццу 🍕", reply_markup=menu_keyboard_1())
 
         else:
             bot.send_message(message.from_user.id, "Добавьте пиццу в заказ, вернитесь к меню или перейдите к оформлению заказа:", item_keyboard_2())
@@ -538,10 +541,15 @@ def giving_text(message):
 
     elif return_state(message) == WAIT_PHONE_ADDRESS or return_state(message) == WAIT_PHONE_LOCATION:
 
-        set_phone(message)
-        send_order(message)
-        add_user(message)
-        bot.send_message(message.from_user.id, "Ваш заказ успешно оформлен! Мы свяжемся с вами в течение 5 минут", reply_markup=menu_keyboard())
+        if message.text.isdigit() or (message.text[0] == "+" and message.text[1:].isdigit()):
+
+            set_phone(message)
+            send_order(message)
+            add_user(message)
+            bot.send_message(message.from_user.id, "Ваш заказ успешно оформлен! Мы свяжемся с вами в течение 5 минут", reply_markup=menu_keyboard())
+
+        else:
+            bot.send_message(message.from_user.id, "Отправьте контакт через кнопку или в введите в формате +71234567890 или 81234567890", reply_markup=phone_keyboard())
 
     elif return_state(message) == WAIT_DEL:
 
