@@ -384,7 +384,7 @@ def send_order(message):
         cursor.execute("SELECT latitude FROM users WHERE user_id = {}".format(message.from_user.id))
         latitude = cursor.fetchone()[0]
         bot.send_message("26978532", order_text)
-        bot.send_location(message.from_user.id, longitude, latitude)
+        bot.send_location("26978532", longitude, latitude)
 
     bot.send_contact('26978532', phone, message.from_user.first_name)
 
