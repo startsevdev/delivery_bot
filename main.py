@@ -3,7 +3,6 @@ from telebot import types
 from datetime import datetime
 import sqlite3
 import logging
-import time
 import sys
 sys.path.append('../')
 import tokens
@@ -384,7 +383,7 @@ def send_order(message):
         cursor.execute("SELECT latitude FROM users WHERE user_id = {}".format(message.from_user.id))
         latitude = cursor.fetchone()[0]
         bot.send_message("26978532", order_text)
-        bot.send_location("26978532", longitude, latitude)
+        bot.send_location("26978532", latitude, longitude)
 
     bot.send_contact('26978532', phone, message.from_user.first_name)
 
@@ -507,7 +506,8 @@ def giving_text(message):
                 set_state(message, WAIT_CONFIRM)
                 bot.send_message(message.from_user.id, return_order_list(message), reply_markup=confirm_order_keyboard())
             else:
-                bot.send_message(message.from_user.id, "Минимальная сумма заказа 500 руб. Добавьте еще одну пиццу 🍕", reply_markup=pre_order_menu_keyboard())
+                set_state(message, WAIT_WATCHING_ITEM)
+                bot.send_message(message.from_user.id, "Минимальная сумма заказа 500 руб. Добавьте еще одну пиццу 🍕", reply_markup=menu_keyboard())
 
         else:
             bot.send_message(message.from_user.id, "Добавьте пиццу в заказ, вернитесь к меню или перейдите к оформлению заказа:", item_keyboard_2())
@@ -573,4 +573,4 @@ def giving_text(message):
             bot.send_message(message.from_user.id, "❗ Введите натуральное число.")
 
 
-bot.polling()
+bot.polling(none_stop=True)
