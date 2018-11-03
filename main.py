@@ -9,7 +9,8 @@ import tokens
 
 
 token = tokens.IskraPizzaBot
-bot = telebot.TeleBot(token)
+
+bot = telebot.TeleBot(token, threaded=False)
 
 logger = telebot.logger
 
@@ -467,6 +468,7 @@ def giving_text(message):
                 set_state(message, WAIT_CONFIRM)
                 bot.send_message(message.from_user.id, return_order_list(message), reply_markup=confirm_order_keyboard())
             else:
+                set_state(message, WAIT_FIRST_WATCHING_ITEM)
                 bot.send_message(message.from_user.id, return_order_list(message) + "\n\nМинимальная сумма заказа 500 руб. Добавьте еще одну пиццу 🍕", reply_markup=menu_keyboard())
 
         elif message.text == "Удалить пиццу":
@@ -485,6 +487,7 @@ def giving_text(message):
                     set_state(message, WAIT_ITEM)
                     break
             else:
+                set_state(message, WAIT_FIRST_WATCHING_ITEM)
                 bot.send_message(message.from_user.id, "Выберите еще одну пиццу, перейдите к офромлению заказа или удалите пиццу", reply_markup=pre_order_menu_keyboard())
 
     elif return_state(message) == WAIT_ITEM:
@@ -519,7 +522,7 @@ def giving_text(message):
                 set_state(message, WAIT_ADDRESS)
                 bot.send_message(message.from_user.id, "Поделитесь своей геопозицией через кнопку ниже или просто впишите улицу, номер дома и подъезд", reply_markup=geo_keyboard())
             else:
-                set_state(message, WAIT_WATCHING_ITEM)
+                set_state(message, WAIT_FIRST_WATCHING_ITEM)
                 bot.send_message(message.from_user.id, return_order_list(message) + "\n\nМинимальная сумма заказа 500 руб. Добавьте еще одну пиццу 🍕", reply_markup=menu_keyboard())
 
         elif message.text == "Добавить пиццу":
@@ -573,4 +576,4 @@ def giving_text(message):
             bot.send_message(message.from_user.id, "❗ Введите натуральное число.")
 
 
-bot.polling(none_stop=True)
+bot.infinity_polling(True)
