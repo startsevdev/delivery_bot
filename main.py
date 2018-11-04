@@ -293,20 +293,21 @@ def return_order_list(message):
 
     # добавляем название и цену добавленных товаров в список кортежей order_items
     for item_id in order_item_ids:
-        cursor.execute("SELECT name, price FROM items WHERE id = {}".format(item_id[0]))
-        order_items.append(cursor.fetchone())
+        cursor.execute("SELECT name FROM items WHERE id = {}".format(item_id[0]))
+        order_items.append(cursor.fetchone()[0])
+        print(order_items)
     conn.close()
 
     # сортируем по имени товара
     order_items = sorted(order_items)
 
     # создаем строку с каждым из товаров
-    for order_item in order_items:
-        order_items_strings.append("{} – {} р.".format(order_item[0], order_item[1]))
+    #for order_item in order_items:
+    #    order_items_strings.append("{} – {} р.".format(order_item[0], order_item[1]))
 
     # создаем пронумерованный список строк
-    for counter, order_items_string in enumerate(order_items_strings, 1):
-        order_text += "{}. {}\n".format(counter, order_items_string)
+    for counter, order_item in enumerate(order_items, 1):
+        order_text += "{}. {}\n".format(counter, order_item)
 
     order_text += "\nСумма: {} р.".format(return_order_sum(message))
 
@@ -427,7 +428,7 @@ def send_order(message):
 @bot.message_handler(commands=['test'])
 def test(message):
     console_print(message)
-    print(return_order_sum(message))
+    print(return_order_list(message))
 
 
 @bot.message_handler(commands=['start'])
@@ -556,7 +557,8 @@ def giving_text(message):
                 bot.send_message(message.from_user.id, return_order_list(message), reply_markup=confirm_order_keyboard())
             else:
                 set_state(message, WAIT_WATCHING_ITEM)
-                bot.send_message(message.from_user.id, "Минимальная сумма заказа 500 руб. Добавьте еще одну пиццу 🍕", reply_markup=menu_keyboard())
+                bot.send_message(message.from_user.id, return_order_list(
+                    message) + "\n\nМинимальная сумма заказа 500 руб. Добавьте еще одну пиццу 🍕", reply_markup=menu_keyboard())
 
         else:
             bot.send_message(message.from_user.id, "Добавьте пиццу в заказ, вернитесь к меню или перейдите к оформлению заказа:", item_keyboard_2())
