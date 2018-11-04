@@ -425,10 +425,18 @@ def send_order(message):
 # HANDLERS
 
 
-@bot.message_handler(commands=['test'])
-def test(message):
-    console_print(message)
-    print(return_order_list(message))
+#@bot.message_handler(content_types="photo")
+#def photo(message):
+#    console_print(message)
+#    id = message.photo[0].file_id
+#    print(id)
+#    bot.send_photo(message.from_user.id, id)
+
+
+#@bot.message_handler(commands=['test'])
+#def test(message):
+#    console_print(message)
+#    print(return_order_list(message))
 
 
 @bot.message_handler(commands=['start'])
@@ -485,8 +493,8 @@ def giving_text(message):
 
         for item in items:
             if message.text == item:
-                set_watching_item(message)
                 send_item(message)
+                set_watching_item(message)
                 set_state(message, WAIT_FIRST_ITEM)
                 break
         else:
