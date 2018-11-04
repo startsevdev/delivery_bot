@@ -1,4 +1,6 @@
 import telebot
+import ssl
+from geopy.geocoders import Nominatim
 from telebot import types
 from datetime import datetime
 import sqlite3
@@ -8,13 +10,12 @@ sys.path.append('../')
 import tokens
 
 
-token = tokens.IskraPizzaBot
+bot = telebot.TeleBot(tokens.IskraPizzaBot, threaded=False)
 
-bot = telebot.TeleBot(token, threaded=False)
-
-logger = telebot.logger
+geolocator = Nominatim(user_agent="http://telegram.me/iskrapizzabot")
 
 database = "/Users/alexander/code/bots/databases/iskra.db"
+
 
 WAIT_DEL = 0
 WAIT_FIRST_WATCHING_ITEM = 1
@@ -23,8 +24,9 @@ WAIT_WATCHING_ITEM = 3
 WAIT_ITEM = 4
 WAIT_CONFIRM = 5
 WAIT_ADDRESS = 6
-WAIT_PHONE_LOCATION = 7
-WAIT_PHONE_ADDRESS = 8
+WAIT_OTHER_ADDRESS = 7
+WAIT_PHONE_LOCATION = 8
+WAIT_PHONE_ADDRESS = 9
 
 
 print("\n- - - StartsevDev's IskraPizzaBot - - -\n")
@@ -115,8 +117,17 @@ def numbers_keyboard():
 
 def geo_keyboard():
     keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-    button_geo = types.KeyboardButton(text="Отправить точку на карте", request_location=True)
+    button_geo = types.KeyboardButton(text="Поделиться текущим местоположением", request_location=True)
     keyboard.add(button_geo)
+
+    return keyboard
+
+
+def other_geo_keyboard():
+    keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+    button_geo = types.KeyboardButton(text="Поделиться текущим местоположением", request_location=True)
+    keyboard.add(button_geo)
+    keyboard.add("Отменить заказ")
 
     return keyboard
 
@@ -127,6 +138,28 @@ def phone_keyboard():
     keyboard.add(button_phone)
 
     return keyboard
+
+
+# GEOPY
+
+
+def return_district(message):
+    try:
+        _create_unverified_https_context = ssl._create_unverified_context
+
+    except AttributeError:
+        # Legacy Python that doesn't verify HTTPS certificates by default
+        pass
+
+    else:
+        # Handle target environment that doesn't support HTTPS verification
+        ssl._create_default_https_context = _create_unverified_https_context
+
+    coords = "{}, {}".format(message.location.latitude, message.location.longitude)
+
+    location = geolocator.reverse(coords)
+
+    return location.raw['address']['state_district']
 
 
 # DATABASE FUNCTIONS
@@ -275,11 +308,6 @@ def return_order_list(message):
     for counter, order_items_string in enumerate(order_items_strings, 1):
         order_text += "{}. {}\n".format(counter, order_items_string)
 
-    # считаем сумму заказа
-    #for order_item in order_items:
-     #   order_items_prices.append(order_item[1])
-    #order_sum = sum(order_items_prices)
-
     order_text += "\nСумма: {} р.".format(return_order_sum(message))
 
     if order_text == "Мой заказ:\n\nСумма: 0 р.":
@@ -364,7 +392,7 @@ def set_phone(message):
 
 
 def send_order(message):
-    order_text = return_order_list(message) + "\n"
+    order_text = return_order_list(message) + "\n\n"
 
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
@@ -374,8 +402,12 @@ def send_order(message):
 
     if return_state(message) == WAIT_PHONE_ADDRESS:
         cursor.execute("SELECT address FROM users WHERE user_id = {}".format(message.from_user.id))
+
         address = cursor.fetchone()[0]
+
         order_text += "Адрес: " + address
+
+        bot.send_contact('26978532', phone, message.from_user.first_name)
         bot.send_message("26978532", order_text)
 
     elif return_state(message) == WAIT_PHONE_LOCATION:
@@ -383,10 +415,10 @@ def send_order(message):
         longitude = cursor.fetchone()[0]
         cursor.execute("SELECT latitude FROM users WHERE user_id = {}".format(message.from_user.id))
         latitude = cursor.fetchone()[0]
+
+        bot.send_contact('26978532', phone, message.from_user.first_name)
         bot.send_message("26978532", order_text)
         bot.send_location("26978532", latitude, longitude)
-
-    bot.send_contact('26978532', phone, message.from_user.first_name)
 
 
 # HANDLERS
@@ -412,10 +444,24 @@ def get_location(message):
     console_print(message)
 
     if return_state(message) == WAIT_ADDRESS:
+        if return_district(message) == "Центральный район":
+            set_location(message)
+            set_state(message, WAIT_PHONE_LOCATION)
 
-        set_location(message)
-        set_state(message, WAIT_PHONE_LOCATION)
-        bot.send_message(message.from_user.id, "По какому номеру мы можем связаться с вами?", reply_markup=phone_keyboard())
+            bot.send_message(message.from_user.id, "По какому номеру мы можем связаться с вами?", reply_markup=phone_keyboard())
+
+        else:
+            set_state(message, WAIT_OTHER_ADDRESS)
+            bot.send_message(message.from_user.id, "Доставка доступна только в Центральном районе 🤷‍♀\n\nЧтобы указать другой адрес, нажмите 📎, затем 📍 и выберите другую точку на карте", reply_markup=other_geo_keyboard())
+
+    elif return_state(message) == WAIT_OTHER_ADDRESS:
+        if return_district(message) == "Центральный район":
+            set_location(message)
+            set_state(message, WAIT_PHONE_LOCATION)
+
+            bot.send_message(message.from_user.id, "По какому номеру мы можем связаться с вами?", reply_markup=phone_keyboard())
+        else:
+            bot.send_message(message.from_user.id, "Доставка доступна только в Центральном районе 🤷‍♀\n\nЧтобы указать другой адрес, нажмите 📎, затем 📍 и выберите другую точку на карте", reply_markup=other_geo_keyboard())
 
 
 @bot.message_handler(content_types="contact")
@@ -542,6 +588,17 @@ def giving_text(message):
         set_state(message, WAIT_PHONE_ADDRESS)
         bot.send_message(message.from_user.id, "По какому номеру мы можем связаться с вами?", reply_markup=phone_keyboard())
 
+    elif return_state(message) == WAIT_OTHER_ADDRESS:
+
+        if message.text == "Отменить заказ":
+            add_user(message)
+            bot.send_message(message.from_user.id, "Заказ отменен")
+            bot.send_message(message.from_user.id, "Выберите пиццу: ", reply_markup=menu_keyboard())
+        else:
+            set_address(message)
+            set_state(message, WAIT_PHONE_ADDRESS)
+            bot.send_message(message.from_user.id, "По какому номеру мы можем связаться с вами?", reply_markup=phone_keyboard())
+
     elif return_state(message) == WAIT_PHONE_ADDRESS or return_state(message) == WAIT_PHONE_LOCATION:
 
         if message.text.isdigit() or (message.text[0] == "+" and message.text[1:].isdigit()):
@@ -549,7 +606,8 @@ def giving_text(message):
             set_phone(message)
             send_order(message)
             add_user(message)
-            bot.send_message(message.from_user.id, "Ваш заказ успешно оформлен! Мы свяжемся с вами в течение 5 минут", reply_markup=menu_keyboard())
+            bot.send_message(message.from_user.id, "Ваш заказ успешно оформлен! Мы свяжемся с вами в течение 5 минут")
+            bot.send_message(message.from_user.id, "Выберите пиццу: ", reply_markup=menu_keyboard())
 
         else:
             bot.send_message(message.from_user.id, "Отправьте контакт через кнопку или в введите в формате +71234567890 или 81234567890", reply_markup=phone_keyboard())
