@@ -143,14 +143,12 @@ def phone_keyboard():
 # GEOPY
 
 
-def return_district(message):
+def check_location(message):
     try:
         _create_unverified_https_context = ssl._create_unverified_context
-
     except AttributeError:
         # Legacy Python that doesn't verify HTTPS certificates by default
         pass
-
     else:
         # Handle target environment that doesn't support HTTPS verification
         ssl._create_default_https_context = _create_unverified_https_context
@@ -159,7 +157,20 @@ def return_district(message):
 
     location = geolocator.reverse(coords)
 
-    return location.raw['address']['state_district']
+    try:
+        state = location.raw['address']['state']
+        district = location.raw['address']['state_district']
+
+        if state == "Санкт-Петербург" and district == "Центральный район":
+            check = True
+            
+        else:
+            check = False
+
+    except KeyError:
+        check = False
+
+    return check
 
 
 # DATABASE FUNCTIONS
@@ -453,7 +464,7 @@ def get_location(message):
     console_print(message)
 
     if return_state(message) == WAIT_ADDRESS:
-        if return_district(message) == "Центральный район":
+        if check_location(message):
             set_location(message)
             set_state(message, WAIT_PHONE_LOCATION)
 
@@ -464,7 +475,7 @@ def get_location(message):
             bot.send_message(message.from_user.id, "Доставка доступна только в Центральном районе 🤷‍♀\n\nЧтобы указать другой адрес, нажмите 📎, затем 📍 и выберите другую точку на карте", reply_markup=other_geo_keyboard())
 
     elif return_state(message) == WAIT_OTHER_ADDRESS:
-        if return_district(message) == "Центральный район":
+        if check_location(message):
             set_location(message)
             set_state(message, WAIT_PHONE_LOCATION)
 
@@ -617,7 +628,7 @@ def giving_text(message):
             send_order(message)
             add_user(message)
             bot.send_message(message.from_user.id, "Ваш заказ успешно оформлен! Мы свяжемся с вами в течение 5 минут")
-            bot.send_message(message.from_user.id, "Выберите пиццу: ", reply_markup=menu_keyboard())
+            bot.send_message(message.from_user.id, "Новый заказ: ", reply_markup=menu_keyboard())
 
         else:
             bot.send_message(message.from_user.id, "Отправьте контакт через кнопку или в введите в формате +71234567890 или 81234567890", reply_markup=phone_keyboard())
@@ -644,4 +655,4 @@ def giving_text(message):
             bot.send_message(message.from_user.id, "❗ Введите натуральное число.")
 
 
-bot.infinity_polling(True)
+bot.polling(True)
