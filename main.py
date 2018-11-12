@@ -4,7 +4,6 @@ from geopy.geocoders import Nominatim
 from telebot import types
 from datetime import datetime
 import sqlite3
-import logging
 import sys
 sys.path.append('../')
 import tokens
@@ -463,20 +462,6 @@ def send_order(message):
 
 
 # HANDLERS
-
-
-#@bot.message_handler(content_types="photo")
-#def photo(message):
-#    console_print(message)
-#    id = message.photo[0].file_id
-#    print(id)
-#    bot.send_photo(message.from_user.id, id)
-
-
-#@bot.message_handler(commands=['test'])
-#def test(message):
-#    console_print(message)
-#    print(return_order_list(message))
 
 
 @bot.message_handler(commands=['start'])
