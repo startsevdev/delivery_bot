@@ -37,7 +37,17 @@ print("\n- - - StartsevDev's IskraPizzaBot - - -\n")
 
 def console_print(message):
     now = datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")
-    print("{} | {}: {}".format(now, message.from_user.first_name, message.text))
+
+    if message.content_type == "location":
+        print("{} | {}: {}, {}".format
+              (now, message.from_user.first_name, message.location.latitude, message.location.longitude))
+
+    elif message.content_type == "contact":
+        print("{} | {}: {}".format
+              (now, message.from_user.first_name, message.contact.phone_number))
+
+    else:
+        print("{} | {}: {}".format(now, message.from_user.first_name, message.text))
 
 
 def return_items():
@@ -163,7 +173,7 @@ def check_location(message):
 
         if state == "Санкт-Петербург" and district == "Центральный район":
             check = True
-            
+
         else:
             check = False
 
@@ -256,6 +266,25 @@ def send_item(message):
         bot.send_message(message.from_user.id, str(price) + " р.", reply_markup=item_keyboard_2())
 
 
+def send_watching_item(message):
+    conn = sqlite3.connect(database)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT watching_item from users WHERE user_id = {}".format(message.from_user.id))
+    watching_item_id = cursor.fetchone()[0]
+
+    cursor.execute("SELECT image FROM items WHERE id = {}".format(watching_item_id))
+    image = cursor.fetchone()[0]
+
+    cursor.execute("SELECT price FROM items WHERE id = {}".format(watching_item_id))
+    price = cursor.fetchone()[0]
+
+    conn.close()
+
+    bot.send_photo(message.from_user.id, image)
+    bot.send_message(message.from_user.id, str(price) + " р.", reply_markup=item_keyboard_1())
+
+
 def add_item_in_order(message):
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
@@ -306,7 +335,7 @@ def return_order_list(message):
     for item_id in order_item_ids:
         cursor.execute("SELECT name FROM items WHERE id = {}".format(item_id[0]))
         order_items.append(cursor.fetchone()[0])
-        print(order_items)
+        #print(order_items)
     conn.close()
 
     # сортируем по имени товара
@@ -361,7 +390,7 @@ def del_item_from_order(message):
     # сортируем
     names_ids = sorted(names_ids)
 
-    print(names_ids)
+    #print(names_ids)
 
     try:
         del_id = names_ids[int(message.text) - 1][1]
@@ -459,6 +488,28 @@ def start(message):
     bot.send_message(message.from_user.id, "Добро пожаловать!\n\nВыберите пиццу: ", reply_markup=menu_keyboard())
 
 
+@bot.message_handler(commands=['cancel'])
+def cancel(message):
+    state = return_state(message)
+
+    if state == WAIT_FIRST_WATCHING_ITEM:
+
+        bot.send_message(message.from_user.id, "Заказ пуст. Выберите пиццу: ", reply_markup=menu_keyboard())
+
+    elif state == WAIT_FIRST_ITEM:
+
+        bot.send_message(message.from_user.id, "Ваш заказ пуст. Добавьте в него эту пиццу или перейдите в меню")
+
+        send_watching_item(message)
+
+    else:
+
+        add_user(message)
+
+        bot.send_message(message.from_user.id, "Заказ отменен")
+        bot.send_message(message.from_user.id, "Новый заказ: ", reply_markup=menu_keyboard())
+
+
 @bot.message_handler(content_types="location")
 def get_location(message):
     console_print(message)
@@ -493,7 +544,8 @@ def get_contact(message):
         set_phone(message)
         send_order(message)
         add_user(message)
-        bot.send_message(message.from_user.id, "Ваш заказ успешно оформлен! Мы свяжемся с вами в течение 5 минут", reply_markup=menu_keyboard())
+        bot.send_message(message.from_user.id, "Ваш заказ успешно оформлен! Мы свяжемся с вами в течение 5 минут")
+        bot.send_message(message.from_user.id, "Новый заказ: ", reply_markup=menu_keyboard())
 
 
 @bot.message_handler(content_types="text")
