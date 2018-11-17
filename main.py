@@ -1,6 +1,9 @@
 import telebot
 import ssl
+import json
 from geopy.geocoders import Nominatim
+from shapely.geometry import Point
+from shapely.geometry.polygon import Polygon
 from telebot import types
 from datetime import datetime
 import sqlite3
@@ -47,6 +50,11 @@ def console_print(message):
 
     else:
         print("{} | {}: {}".format(now, message.from_user.first_name, message.text))
+
+
+def open_json(file):
+    with open(file, "r") as file:
+        return json.load(file)
 
 
 def return_items():
@@ -149,37 +157,17 @@ def phone_keyboard():
     return keyboard
 
 
-# GEOPY
+# GEO
 
 
 def check_location(message):
-    try:
-        _create_unverified_https_context = ssl._create_unverified_context
-    except AttributeError:
-        # Legacy Python that doesn't verify HTTPS certificates by default
-        pass
-    else:
-        # Handle target environment that doesn't support HTTPS verification
-        ssl._create_default_https_context = _create_unverified_https_context
+    zone_coords = open_json("zone.json")
+    point_coords = (message.location.latitude, message.location.longitude)
 
-    coords = "{}, {}".format(message.location.latitude, message.location.longitude)
+    polygon = Polygon(zone_coords)
+    point = Point(point_coords)
 
-    location = geolocator.reverse(coords)
-
-    try:
-        state = location.raw['address']['state']
-        district = location.raw['address']['state_district']
-
-        if state == "Санкт-Петербург" and district == "Центральный район":
-            check = True
-
-        else:
-            check = False
-
-    except KeyError:
-        check = False
-
-    return check
+    return polygon.contains(point)
 
 
 # DATABASE FUNCTIONS
