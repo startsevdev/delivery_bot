@@ -452,6 +452,16 @@ def send_order(message):
 # HANDLERS
 
 
+# получает id фотографии для повторного использования
+#
+# @bot.message_handler(content_types="photo")
+# def photo(message):
+#    console_print(message)
+#    id = message.photo[0].file_id
+#    print(id)
+#    bot.send_photo(message.from_user.id, id)
+
+
 @bot.message_handler(commands=['start'])
 def start(message):
     console_print(message)
@@ -496,7 +506,10 @@ def get_location(message):
 
         else:
             set_state(message, WAIT_OTHER_ADDRESS)
-            bot.send_message(message.from_user.id, "Доставка доступна только в Центральном районе 🤷‍♀\n\nЧтобы указать другой адрес, нажмите 📎, затем 📍 и выберите другую точку на карте", reply_markup=other_geo_keyboard())
+            bot.send_photo(message.from_user.id, "AgADAgADrqkxGwNBiUv2fto1oCPHvdCXOQ8ABAgVsEp8Jjzq1egAAgI")
+            bot.send_message(message.from_user.id,
+                             "Доставка доступна только в этой зоне 🤷‍♀\n\nЧтобы указать другой адрес, нажмите 📎, затем 📍 и выберите другую точку на карте",
+                             reply_markup=other_geo_keyboard())
 
     elif return_state(message) == WAIT_OTHER_ADDRESS:
         if check_location(message):
@@ -505,7 +518,8 @@ def get_location(message):
 
             bot.send_message(message.from_user.id, "По какому номеру мы можем связаться с вами?", reply_markup=phone_keyboard())
         else:
-            bot.send_message(message.from_user.id, "Доставка доступна только в Центральном районе 🤷‍♀\n\nЧтобы указать другой адрес, нажмите 📎, затем 📍 и выберите другую точку на карте", reply_markup=other_geo_keyboard())
+            bot.send_photo(message.from_user.id, "AgADAgADrqkxGwNBiUv2fto1oCPHvdCXOQ8ABAgVsEp8Jjzq1egAAgI")
+            bot.send_message(message.from_user.id, "Доставка доступна только в этой зоне 🤷‍♀\n\nЧтобы указать другой адрес, нажмите 📎, затем 📍 и выберите другую точку на карте", reply_markup=other_geo_keyboard())
 
 
 @bot.message_handler(content_types="contact")
