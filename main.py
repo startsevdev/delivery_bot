@@ -254,12 +254,10 @@ def send_item(message):
 
     conn.close()
 
-    bot.send_photo(message.from_user.id, image)
-
     if return_state(message) == WAIT_FIRST_WATCHING_ITEM:
-        bot.send_message(message.from_user.id, str(price) + " р.", reply_markup=item_keyboard_1())
+        bot.send_photo(message.from_user.id, image, caption=str(price) + " р.", reply_markup=item_keyboard_1())
     elif return_state(message) == WAIT_WATCHING_ITEM:
-        bot.send_message(message.from_user.id, str(price) + " р.", reply_markup=item_keyboard_2())
+        bot.send_photo(message.from_user.id, image, caption=str(price) + " р.", reply_markup=item_keyboard_2())
 
 
 def send_watching_item(message):
