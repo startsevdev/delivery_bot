@@ -6,7 +6,7 @@ from datetime import datetime
 import sqlite3
 
 
-bot = telebot.TeleBot("TOKEN")
+bot = telebot.TeleBot("656442097:AAFcAz-0-4TN88kQhmOGqCS81gTf_zuB9Zc")
 
 geolocator = Nominatim(user_agent="http://telegram.me/iskrapizzabot")
 
@@ -146,7 +146,7 @@ def phone_keyboard():
     return keyboard
 
 
-# GEOPY
+# GEO
 
 
 def check_location(message):
@@ -177,6 +177,23 @@ def check_location(message):
         check = False
 
     return check
+
+
+def return_address(latitude, longitude):
+    try:
+        _create_unverified_https_context = ssl._create_unverified_context
+    except AttributeError:
+        # Legacy Python that doesn't verify HTTPS certificates by default
+        pass
+    else:
+        # Handle target environment that doesn't support HTTPS verification
+        ssl._create_default_https_context = _create_unverified_https_context
+
+    coords = "{}, {}".format(latitude, longitude)
+    location = geolocator.reverse(coords).raw['address']
+    address = "{}, {}".format(location["road"], location["house_number"])
+
+    return address
 
 
 # DATABASE FUNCTIONS
@@ -437,7 +454,6 @@ def send_order(message):
 
     if return_state(message) == WAIT_PHONE_ADDRESS:
         cursor.execute("SELECT address FROM users WHERE user_id = {}".format(message.from_user.id))
-
         address = cursor.fetchone()[0]
 
         order_text += "Адрес: " + address
@@ -450,6 +466,8 @@ def send_order(message):
         longitude = cursor.fetchone()[0]
         cursor.execute("SELECT latitude FROM users WHERE user_id = {}".format(message.from_user.id))
         latitude = cursor.fetchone()[0]
+
+        order_text += "Адрес: " + return_address(latitude, longitude)
 
         bot.send_contact('26978532', phone, message.from_user.first_name)
         bot.send_message("26978532", order_text)
